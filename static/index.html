@@ -1,130 +1,284 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>YOLO Object Detector</title>
+    <title>VisionAI - Object Detection</title>
 
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: Arial, sans-serif;
-            background: #f4f6f8;
+            background: #0b1020;
+            color: #ffffff;
             min-height: 100vh;
-            padding: 40px 20px;
         }
 
-        .container {
-            max-width: 850px;
+        .topbar {
+            height: 70px;
+            background: #11182d;
+            border-bottom: 1px solid #252d47;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #6c63ff;
+        }
+
+        .system-status {
+            font-size: 13px;
+            color: #8ee6b5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            background: #43d17a;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .main {
+            max-width: 1150px;
             margin: auto;
+            padding: 55px 25px;
         }
 
-        .header {
+        .hero {
+            margin-bottom: 40px;
+        }
+
+        .hero .tag {
+            display: inline-block;
+            background: #191d3b;
+            color: #8d87ff;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 span {
+            color: #6c63ff;
+        }
+
+        .hero p {
+            color: #9299b3;
+            font-size: 16px;
+            max-width: 650px;
+            line-height: 1.7;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .panel {
+            background: #11182d;
+            border: 1px solid #252d47;
+            border-radius: 18px;
+            padding: 28px;
+        }
+
+        .panel-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .panel-title h2 {
+            font-size: 18px;
+        }
+
+        .panel-title small {
+            color: #777f9b;
+        }
+
+        .drop-zone {
+            min-height: 310px;
+            border: 2px dashed #394263;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            margin-bottom: 30px;
+            padding: 25px;
+            transition: 0.2s;
         }
 
-        .header h1 {
-            font-size: 36px;
-            color: #222;
-            margin-bottom: 10px;
+        .drop-zone:hover {
+            border-color: #6c63ff;
+            background: #151b35;
         }
 
-        .header p {
-            color: #666;
-            font-size: 17px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-        }
-
-        .upload-area {
-            border: 2px dashed #aaa;
-            border-radius: 12px;
-            padding: 35px;
-            text-align: center;
-        }
-
-        .upload-area p {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        input[type="file"] {
+        .upload-icon {
+            width: 70px;
+            height: 70px;
+            background: #1d2341;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
             margin-bottom: 20px;
         }
 
-        button {
-            background: #222;
+        .drop-zone h3 {
+            margin-bottom: 8px;
+        }
+
+        .drop-zone p {
+            color: #777f9b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .choose-btn {
+            background: #6c63ff;
             color: white;
+            padding: 12px 22px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: bold;
             border: none;
-            padding: 13px 28px;
-            border-radius: 8px;
-            font-size: 16px;
+        }
+
+        .choose-btn:hover {
+            background: #8179ff;
+        }
+
+        .file-name {
+            color: #9299b3;
+            font-size: 13px;
+            margin-top: 14px;
+        }
+
+        .detect-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: #ffffff;
+            color: #0b1020;
+            border: none;
+            border-radius: 9px;
+            font-weight: bold;
+            font-size: 15px;
             cursor: pointer;
         }
 
-        button:hover {
-            background: #444;
+        .detect-btn:hover {
+            background: #dfe2ff;
         }
 
-        button:disabled {
-            background: #999;
+        .detect-btn:disabled {
+            background: #555b70;
+            color: #c5c8d2;
             cursor: not-allowed;
         }
 
-        #status {
-            text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
-            color: #555;
+        .image-box {
+            min-height: 310px;
+            background: #0b1020;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #252d47;
         }
 
-        .preview-section {
-            margin-top: 25px;
-            text-align: center;
-        }
-
-        .preview-section h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .preview-section img {
+        .image-box img {
             max-width: 100%;
-            max-height: 450px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
+            max-height: 420px;
+            display: block;
         }
 
-        .results-info {
-            margin-top: 25px;
-            text-align: left;
+        .empty-result {
+            text-align: center;
+            color: #666e88;
+            padding: 30px;
         }
 
-        .results-info h3 {
+        .empty-result .big-icon {
+            font-size: 45px;
             margin-bottom: 15px;
-            color: #333;
+        }
+
+        .results-panel {
+            margin-top: 25px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #171f38;
+            border: 1px solid #252d47;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            color: #777f9b;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .detection-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
 
         .detection-item {
+            background: #171f38;
+            border: 1px solid #252d47;
+            border-radius: 10px;
+            padding: 15px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: #f4f6f8;
-            border-radius: 8px;
         }
 
         .object-name {
@@ -132,102 +286,301 @@
         }
 
         .confidence {
-            color: #555;
+            color: #8d87ff;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #status {
+            margin-top: 18px;
+            text-align: center;
+            color: #8d95ad;
+            font-size: 14px;
         }
 
         .hidden {
-            display: none;
+            display: none !important;
+        }
+
+        footer {
+            text-align: center;
+            color: #555d76;
+            font-size: 12px;
+            padding: 35px;
+        }
+
+        @media (max-width: 800px) {
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .detection-list {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+    <header class="topbar">
 
-        <div class="header">
-            <h1>YOLO Object Detector</h1>
-
-            <p>
-                Upload an image and detect objects using YOLO
-            </p>
+        <div class="logo">
+            Vision<span>AI</span>
         </div>
 
+        <div class="system-status">
+            <span class="status-dot"></span>
+            AI Engine Online
+        </div>
 
-        <!-- Upload Card -->
+    </header>
 
-        <div class="card">
 
-            <div class="upload-area">
+    <main class="main">
 
-                <p>Select an image to begin detection</p>
+        <section class="hero">
 
-                <input
-                    type="file"
-                    id="imageInput"
-                    accept="image/*"
-                >
+            <span class="tag">YOLO11 OBJECT DETECTION</span>
 
-                <br>
+            <h1>
+                Turn Images Into
+                <span>Insights.</span>
+            </h1>
+
+            <p>
+                Upload an image and let our AI-powered computer vision
+                engine identify objects automatically with confidence scores.
+            </p>
+
+        </section>
+
+
+        <section class="workspace">
+
+
+            <!-- Upload Panel -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>Input Image</h2>
+
+                    <small>Step 01</small>
+
+                </div>
+
+
+                <div class="drop-zone">
+
+                    <div class="upload-icon">
+                        ↑
+                    </div>
+
+                    <h3>Select an image</h3>
+
+                    <p>
+                        JPG, JPEG, PNG or other supported image formats
+                    </p>
+
+
+                    <label for="imageInput" class="choose-btn">
+                        Choose Image
+                    </label>
+
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept="image/*"
+                    >
+
+                    <div
+                        id="fileName"
+                        class="file-name"
+                    >
+                        No image selected
+                    </div>
+
+                </div>
+
 
                 <button
                     id="detectButton"
+                    class="detect-btn"
                     onclick="detectObjects()"
                 >
-                    Detect Objects
+                    Run AI Detection
                 </button>
 
+
+                <div id="status"></div>
+
             </div>
 
-            <div id="status"></div>
 
-        </div>
+            <!-- Preview / Result Panel -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <h2>Detection Output</h2>
+
+                    <small>Step 02</small>
+
+                </div>
 
 
-        <!-- Selected Image -->
+                <div class="image-box">
 
-        <div
-            class="card preview-section hidden"
+                    <div
+                        id="emptyResult"
+                        class="empty-result"
+                    >
+
+                        <div class="big-icon">
+                            ◉
+                        </div>
+
+                        <p>
+                            Detection result will appear here
+                        </p>
+
+                    </div>
+
+
+                    <img
+                        id="resultImage"
+                        class="hidden"
+                        alt="Detection Result"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Selected Image Preview -->
+
+        <section
             id="previewSection"
+            class="panel results-panel hidden"
         >
 
-            <h2>Selected Image</h2>
+            <div class="panel-title">
 
-            <img
-                id="previewImage"
-                alt="Selected Image"
-            >
+                <h2>Original Image</h2>
 
-        </div>
-
-
-        <!-- Detection Result -->
-
-        <div
-            class="card preview-section hidden"
-            id="resultSection"
-        >
-
-            <h2>Detection Result</h2>
-
-            <img
-                id="resultImage"
-                alt="Detected Image"
-            >
-
-            <div class="results-info">
-
-                <h3 id="totalObjects">
-                    Detected Objects
-                </h3>
-
-                <div id="detectionList"></div>
+                <small>Uploaded Image</small>
 
             </div>
 
-        </div>
+            <div class="image-box">
 
-    </div>
+                <img
+                    id="previewImage"
+                    alt="Selected Image"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- Results -->
+
+        <section
+            id="resultSection"
+            class="panel results-panel hidden"
+        >
+
+            <div class="panel-title">
+
+                <h2>AI Analysis</h2>
+
+                <small>Detection Summary</small>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        TOTAL OBJECTS
+                    </div>
+
+                    <div
+                        id="totalObjects"
+                        class="stat-value"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        DETECTION ENGINE
+                    </div>
+
+                    <div class="stat-value">
+                        YOLO11
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        STATUS
+                    </div>
+
+                    <div
+                        id="analysisStatus"
+                        class="stat-value"
+                    >
+                        Ready
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="detectionList"
+                class="detection-list"
+            ></div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        VisionAI • AI Powered Object Detection
+    </footer>
 
 
     <script>
@@ -247,6 +600,9 @@
         const resultImage =
             document.getElementById("resultImage");
 
+        const emptyResult =
+            document.getElementById("emptyResult");
+
         const status =
             document.getElementById("status");
 
@@ -259,36 +615,58 @@
         const totalObjects =
             document.getElementById("totalObjects");
 
+        const analysisStatus =
+            document.getElementById("analysisStatus");
 
-        // Preview selected image
+        const fileName =
+            document.getElementById("fileName");
 
-        imageInput.addEventListener("change", function () {
 
-            if (!imageInput.files.length) {
-                return;
+        // Image selection
+
+        imageInput.addEventListener(
+            "change",
+            function () {
+
+                if (!imageInput.files.length) {
+                    return;
+                }
+
+                const file =
+                    imageInput.files[0];
+
+                const imageURL =
+                    URL.createObjectURL(file);
+
+                previewImage.src =
+                    imageURL;
+
+                previewSection.classList.remove(
+                    "hidden"
+                );
+
+                resultSection.classList.add(
+                    "hidden"
+                );
+
+                resultImage.classList.add(
+                    "hidden"
+                );
+
+                emptyResult.classList.remove(
+                    "hidden"
+                );
+
+                fileName.innerText =
+                    file.name;
+
+                status.innerText = "";
+
             }
-
-            const file = imageInput.files[0];
-
-            const imageURL =
-                URL.createObjectURL(file);
-
-            previewImage.src = imageURL;
-
-            previewSection.classList.remove(
-                "hidden"
-            );
-
-            resultSection.classList.add(
-                "hidden"
-            );
-
-            status.innerText = "";
-
-        });
+        );
 
 
-        // Detect objects
+        // Object detection
 
         async function detectObjects() {
 
@@ -298,6 +676,7 @@
                     "Please select an image first.";
 
                 return;
+
             }
 
 
@@ -314,7 +693,7 @@
 
 
             status.innerText =
-                "Detecting objects... Please wait.";
+                "AI is analyzing your image...";
 
             detectButton.disabled = true;
 
@@ -344,31 +723,42 @@
                 }
 
 
-                // Get JSON response
-
                 const data =
                     await response.json();
 
 
-                // Show detected image
+                // Display detected image
 
                 resultImage.src =
-                    data.image_url + "?t=" + Date.now();
+                    data.image_url +
+                    "?t=" +
+                    Date.now();
+
+                resultImage.classList.remove(
+                    "hidden"
+                );
+
+                emptyResult.classList.add(
+                    "hidden"
+                );
 
 
-                // Clear old results
+                // Clear previous detections
 
                 detectionList.innerHTML = "";
 
 
-                // Show total detections
+                // Total objects
 
                 totalObjects.innerText =
-                    "Detected Objects: " +
                     data.detections.length;
 
 
-                // Show each object
+                analysisStatus.innerText =
+                    "Complete";
+
+
+                // Detection list
 
                 data.detections.forEach(
                     function (detection) {
@@ -405,7 +795,7 @@
 
 
                 status.innerText =
-                    "Detection completed successfully!";
+                    "AI detection completed successfully.";
 
 
             } catch (error) {
@@ -415,9 +805,13 @@
                 status.innerText =
                     "Unable to connect to the detection server.";
 
+                analysisStatus.innerText =
+                    "Failed";
+
             } finally {
 
-                detectButton.disabled = false;
+                detectButton.disabled =
+                    false;
 
             }
 
@@ -427,3 +821,4 @@
 
 </body>
 </html>
+```
