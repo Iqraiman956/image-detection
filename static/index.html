@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YOLO Object Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 17px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .upload-area {
+            border: 2px dashed #aaa;
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #222;
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .preview-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .preview-section h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .preview-section img {
+            max-width: 100%;
+            max-height: 450px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .results-info {
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .results-info h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .detection-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f4f6f8;
+            border-radius: 8px;
+        }
+
+        .object-name {
+            font-weight: bold;
+        }
+
+        .confidence {
+            color: #555;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>YOLO Object Detector</h1>
+
+            <p>
+                Upload an image and detect objects using YOLO
+            </p>
+        </div>
+
+
+        <!-- Upload Card -->
+
+        <div class="card">
+
+            <div class="upload-area">
+
+                <p>Select an image to begin detection</p>
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                >
+
+                <br>
+
+                <button
+                    id="detectButton"
+                    onclick="detectObjects()"
+                >
+                    Detect Objects
+                </button>
+
+            </div>
+
+            <div id="status"></div>
+
+        </div>
+
+
+        <!-- Selected Image -->
+
+        <div
+            class="card preview-section hidden"
+            id="previewSection"
+        >
+
+            <h2>Selected Image</h2>
+
+            <img
+                id="previewImage"
+                alt="Selected Image"
+            >
+
+        </div>
+
+
+        <!-- Detection Result -->
+
+        <div
+            class="card preview-section hidden"
+            id="resultSection"
+        >
+
+            <h2>Detection Result</h2>
+
+            <img
+                id="resultImage"
+                alt="Detected Image"
+            >
+
+            <div class="results-info">
+
+                <h3 id="totalObjects">
+                    Detected Objects
+                </h3>
+
+                <div id="detectionList"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const imageInput =
+            document.getElementById("imageInput");
+
+        const previewSection =
+            document.getElementById("previewSection");
+
+        const previewImage =
+            document.getElementById("previewImage");
+
+        const resultSection =
+            document.getElementById("resultSection");
+
+        const resultImage =
+            document.getElementById("resultImage");
+
+        const status =
+            document.getElementById("status");
+
+        const detectButton =
+            document.getElementById("detectButton");
+
+        const detectionList =
+            document.getElementById("detectionList");
+
+        const totalObjects =
+            document.getElementById("totalObjects");
+
+
+        // Preview selected image
+
+        imageInput.addEventListener("change", function () {
+
+            if (!imageInput.files.length) {
+                return;
+            }
+
+            const file = imageInput.files[0];
+
+            const imageURL =
+                URL.createObjectURL(file);
+
+            previewImage.src = imageURL;
+
+            previewSection.classList.remove(
+                "hidden"
+            );
+
+            resultSection.classList.add(
+                "hidden"
+            );
+
+            status.innerText = "";
+
+        });
+
+
+        // Detect objects
+
+        async function detectObjects() {
+
+            if (!imageInput.files.length) {
+
+                status.innerText =
+                    "Please select an image first.";
+
+                return;
+            }
+
+
+            const file =
+                imageInput.files[0];
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "file",
+                file
+            );
+
+
+            status.innerText =
+                "Detecting objects... Please wait.";
+
+            detectButton.disabled = true;
+
+            resultSection.classList.add(
+                "hidden"
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/detect",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Detection failed"
+                    );
+
+                }
+
+
+                // Get JSON response
+
+                const data =
+                    await response.json();
+
+
+                // Show detected image
+
+                resultImage.src =
+                    data.image_url + "?t=" + Date.now();
+
+
+                // Clear old results
+
+                detectionList.innerHTML = "";
+
+
+                // Show total detections
+
+                totalObjects.innerText =
+                    "Detected Objects: " +
+                    data.detections.length;
+
+
+                // Show each object
+
+                data.detections.forEach(
+                    function (detection) {
+
+                        const item =
+                            document.createElement(
+                                "div"
+                            );
+
+                        item.className =
+                            "detection-item";
+
+                        item.innerHTML = `
+                            <span class="object-name">
+                                ${detection.object}
+                            </span>
+
+                            <span class="confidence">
+                                ${detection.confidence}%
+                            </span>
+                        `;
+
+                        detectionList.appendChild(
+                            item
+                        );
+
+                    }
+                );
+
+
+                resultSection.classList.remove(
+                    "hidden"
+                );
+
+
+                status.innerText =
+                    "Detection completed successfully!";
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                status.innerText =
+                    "Unable to connect to the detection server.";
+
+            } finally {
+
+                detectButton.disabled = false;
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>

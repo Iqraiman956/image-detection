@@ -1,0 +1,7 @@
+﻿venv/
+__pycache__/
+runs/
+*.pyc
+detected_image.jpg
+uploaded_image.jpg
+test.jpg
